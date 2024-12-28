@@ -15,12 +15,21 @@ pub struct FmodPlugin {
     /// Optionally you can provide paths to FMOD plugins which will then be loaded automatically.
     /// For more information see: <https://www.fmod.com/docs/2.01/api/core-guide.html#dynamic>
     pub plugin_paths: Option<&'static [&'static str]>,
+
+    pub buffer_length: u32,
+
+    pub num_buffers: i32,
 }
 
 impl Plugin for FmodPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(VelocityPlugin)
-            .insert_resource(FmodStudio::new(self.audio_banks_paths, self.plugin_paths))
+            .insert_resource(FmodStudio::new(
+                self.audio_banks_paths,
+                self.plugin_paths,
+                self.buffer_length,
+                self.num_buffers,
+            ))
             .add_systems(PreStartup, register_component_hooks)
             .add_systems(
                 Update,
@@ -41,10 +50,16 @@ impl FmodPlugin {
     }
 
     #[must_use]
-    pub fn new(audio_banks_paths: &'static [&'static str]) -> Self {
+    pub fn new(
+        audio_banks_paths: &'static [&'static str],
+        buffer_length: u32,
+        num_buffers: i32,
+    ) -> Self {
         FmodPlugin {
             audio_banks_paths,
             plugin_paths: None,
+            buffer_length,
+            num_buffers,
         }
     }
 }

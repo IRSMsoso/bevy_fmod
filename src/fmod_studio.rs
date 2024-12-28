@@ -17,8 +17,13 @@ use libfmod::{Studio, System};
 pub struct FmodStudio(pub Studio);
 
 impl FmodStudio {
-    pub(crate) fn new(banks_paths: &[&'static str], plugin_paths: Option<&[&'static str]>) -> Self {
-        let studio = Self::init_studio();
+    pub(crate) fn new(
+        banks_paths: &[&'static str],
+        plugin_paths: Option<&[&'static str]>,
+        buffer_length: u32,
+        num_buffers: i32,
+    ) -> Self {
+        let studio = Self::init_studio(buffer_length, num_buffers);
         let studio_core = studio.get_core_system().unwrap();
 
         if let Some(plugin_paths) = plugin_paths {
@@ -64,8 +69,14 @@ impl FmodStudio {
             .expect("Could not load bank.");
     }
 
-    fn init_studio() -> Studio {
+    fn init_studio(buffer_length: u32, num_buffers: i32) -> Studio {
         let studio = Studio::create().expect("Failed to create FMOD studio");
+
+        studio
+            .get_core_system()
+            .expect("Failed to get core system")
+            .set_dsp_buffer_size(buffer_length, num_buffers)
+            .expect("Failed to set dsp buffer size");
 
         let studio_flags = FMOD_STUDIO_INIT_NORMAL;
 
